@@ -26,47 +26,49 @@ node {
     // JWT key credentials.
     // -------------------------------------------------------------------------
 
-    withCredentials([file(credentialsId: SERVER_KEY_CREDENTALS_ID, variable: 'server_key_file')]) {
-        // -------------------------------------------------------------------------
-        // Authenticate to Salesforce using the server key.
-        // -------------------------------------------------------------------------
+	try{	
+		
+		withCredentials([file(credentialsId: SERVER_KEY_CREDENTALS_ID, variable: 'server_key_file')]) {
+			// -------------------------------------------------------------------------
+			// Authenticate to Salesforce using the server key.
+			// -------------------------------------------------------------------------
 
-        stage('Authorize to Salesforce') {
-            rc = command "${toolbelt}/sfdx force:auth:jwt:grant --instanceurl https://curious-goat-asinmq-dev-ed.my.salesforce.com --clientid ${SF_CONSUMER_KEY} --jwtkeyfile ${server_key_file} --username ${SF_USERNAME} --setalias UAT"
-            if (rc != 0) {
-                error 'Salesforce org authorization failed.'
-            }
-        }
-
-
-        // -------------------------------------------------------------------------
-        // Deploy metadata and execute unit tests.
-        // -------------------------------------------------------------------------
-
-        //stage('Deploy and Run Tests') {
-        //    rc = command "${toolbelt}/sfdx force:mdapi:deploy --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
-        //    if (rc != 0) {
-        //        error 'Salesforce deploy and test run failed.'
-        //    }
-        //}
+			stage('Authorize to Salesforce') {
+				rc = command "${toolbelt}/sfdx force:auth:jwt:grant --instanceurl https://curious-goat-asinmq-dev-ed.my.salesforce.com --clientid ${SF_CONSUMER_KEY} --jwtkeyfile ${server_key_file} --username ${SF_USERNAME} --setalias UAT"
+				if (rc != 0) {
+					error 'Salesforce org authorization failed.'
+				}
+			}
 
 
-        // -------------------------------------------------------------------------
-        // Example shows how to run a check-only deploy.
-        // -------------------------------------------------------------------------
+			// -------------------------------------------------------------------------
+			// Deploy metadata and execute unit tests.
+			// -------------------------------------------------------------------------
 
-        stage('Check Only Deploy') {
-            rc = command "${toolbelt}/sfdx force:mdapi:deploy --checkonly --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
-            if (rc != 0) {
-                error 'Salesforce deploy failed.'
-            }
-        }
-    }
-	post { 
-        always { 
-            cleanWs()
-        }
-    }
+			//stage('Deploy and Run Tests') {
+			//    rc = command "${toolbelt}/sfdx force:mdapi:deploy --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+			//    if (rc != 0) {
+			//        error 'Salesforce deploy and test run failed.'
+			//    }
+			//}
+
+
+			// -------------------------------------------------------------------------
+			// Example shows how to run a check-only deploy.
+			// -------------------------------------------------------------------------
+
+			stage('Check Only Deploy') {
+				rc = command "${toolbelt}/sfdx force:mdapi:deploy --checkonly --wait 10 --deploydir ${DEPLOYDIR} --targetusername UAT --testlevel ${TEST_LEVEL}"
+				if (rc != 0) {
+					error 'Salesforce deploy failed.'
+				}
+			}
+		}
+	
+	} finally {
+	
+		deleteDir()
+	}
 }
 
 def command(script) {
