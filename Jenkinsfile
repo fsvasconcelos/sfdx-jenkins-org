@@ -62,6 +62,11 @@ node {
             }
         }
     }
+	post { 
+        always { 
+            cleanWs()
+        }
+    }
 }
 
 def command(script) {
