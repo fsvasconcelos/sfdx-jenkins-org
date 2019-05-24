@@ -70,4 +70,4 @@ def command(script) {
     } else {
 		return bat(returnStatus: true, script: script);
     }
-}
+} 
